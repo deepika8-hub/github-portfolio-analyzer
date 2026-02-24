@@ -20,7 +20,7 @@ async function analyzeProfile() {
     try {
         resultDiv.innerHTML = `<p>Analyzing profile... </p>`;
 
-        const response = await fetch("https://your-render-url.onrender.com/analyze", {
+        const response = await fetch("https://github-portfolio-analyzer-8ab1.onrender.com/analyze", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
