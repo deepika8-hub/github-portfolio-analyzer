@@ -3,9 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
 from datetime import datetime
+import os
 
-app = FastAPI(title="GitHub Recruiter Simulator")
+app = FastAPI(title="GitHub Recruiter Simulator API")
 
+# ------------------ CORS ------------------ #
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,14 +16,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ------------------ ENV TOKEN ------------------ #
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+
 class ProfileRequest(BaseModel):
     username: str
-
 
 @app.get("/")
 def root():
     return {"status": "GitHub Recruiter Simulator API running"}
-
 
 @app.post("/analyze")
 def analyze_profile(request: ProfileRequest):
@@ -32,6 +35,10 @@ def analyze_profile(request: ProfileRequest):
         "Accept": "application/vnd.github+json"
     }
 
+    # 🔥 Use token if available (fixes rate limit)
+    if GITHUB_TOKEN:
+        headers["Authorization"] = f"Bearer {GITHUB_TOKEN}"
+
     profile_url = f"https://api.github.com/users/{username}"
     repos_url = f"https://api.github.com/users/{username}/repos?per_page=100"
 
@@ -39,13 +46,13 @@ def analyze_profile(request: ProfileRequest):
     repos_response = requests.get(repos_url, headers=headers)
 
     if profile_response.status_code == 404:
-       return {"error": "GitHub user not found"}
+        return {"error": "GitHub user not found"}
 
     if profile_response.status_code == 403:
-       return {"error": "GitHub API rate limit exceeded. Try again later."}
+        return {"error": "GitHub API rate limit exceeded. Try again later."}
 
     if profile_response.status_code != 200:
-       return {"error": f"GitHub API error: {profile_response.status_code}"}
+        return {"error": f"GitHub API error: {profile_response.status_code}"}
 
     profile = profile_response.json()
     repos = repos_response.json()
@@ -57,7 +64,7 @@ def analyze_profile(request: ProfileRequest):
     total_stars = sum(repo.get("stargazers_count", 0) for repo in repos)
     total_forks = sum(repo.get("forks_count", 0) for repo in repos)
 
-    # -------- SCORING -------- #
+    # ------------------ SCORING ------------------ #
 
     depth_score = min(public_repos * 2, 20)
     impact_score = min((total_stars + total_forks) * 2, 20)
@@ -71,9 +78,10 @@ def analyze_profile(request: ProfileRequest):
                 recent_repos.append(repo)
 
     consistency_score = min(len(recent_repos) * 3, 20)
-
-    documented = sum(1 for repo in repos if repo.get("description"))
-    documentation_score = min(documented * 2, 20)
+    documentation_score = min(
+        sum(1 for repo in repos if repo.get("description")) * 2,
+        20
+    )
 
     professionalism_score = 20 if bio else 5
 
@@ -85,7 +93,7 @@ def analyze_profile(request: ProfileRequest):
         professionalism_score
     )
 
-    # -------- PROFILE TIER -------- #
+    # ------------------ TIER ------------------ #
 
     if overall_score >= 80:
         tier = "Elite Engineer"
@@ -96,7 +104,7 @@ def analyze_profile(request: ProfileRequest):
     else:
         tier = "Beginner Level"
 
-    # -------- STRONG SIGNALS -------- #
+    # ------------------ SIGNALS ------------------ #
 
     strong_signals = []
     red_flags = []
@@ -121,12 +129,10 @@ def analyze_profile(request: ProfileRequest):
     else:
         red_flags.append("Missing professional bio")
 
-    # -------- RECRUITER SUMMARY -------- #
-
     summary = f"""
-    {username} is categorized as '{tier}' with an overall portfolio score of {overall_score}/100.
-    The profile shows {public_repos} public repositories and {followers} followers.
-    """
+{username} is categorized as '{tier}' with an overall portfolio score of {overall_score}/100.
+The profile shows {public_repos} public repositories and {followers} followers.
+"""
 
     return {
         "username": username,
@@ -145,5 +151,5 @@ def analyze_profile(request: ProfileRequest):
         },
         "strong_signals": strong_signals,
         "red_flags": red_flags,
-        "summary": summary
+        "summary": summary.strip()
     }
