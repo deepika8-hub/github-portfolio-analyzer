@@ -38,8 +38,14 @@ def analyze_profile(request: ProfileRequest):
     profile_response = requests.get(profile_url, headers=headers)
     repos_response = requests.get(repos_url, headers=headers)
 
+    if profile_response.status_code == 404:
+       return {"error": "GitHub user not found"}
+
+    if profile_response.status_code == 403:
+       return {"error": "GitHub API rate limit exceeded. Try again later."}
+
     if profile_response.status_code != 200:
-        return {"error": "GitHub user not found"}
+       return {"error": f"GitHub API error: {profile_response.status_code}"}
 
     profile = profile_response.json()
     repos = repos_response.json()
