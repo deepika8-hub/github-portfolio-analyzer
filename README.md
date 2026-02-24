@@ -68,10 +68,15 @@ Total Score: 100
 ### Backend
 
 cd backend
+
 python -m venv venv
+
 venv\Scripts\activate
+
 pip install fastapi uvicorn requests
+
 uvicorn app.main:app --reload
+
 
 
 Backend runs at:
