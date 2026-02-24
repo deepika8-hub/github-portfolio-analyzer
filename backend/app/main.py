@@ -4,9 +4,8 @@ from pydantic import BaseModel
 import requests
 from datetime import datetime
 
-app = FastAPI(title="GitHub Portfolio Analyzer API")
+app = FastAPI(title="GitHub Recruiter Simulator")
 
-# ✅ CORS (IMPORTANT FOR GITHUB PAGES)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,7 +20,7 @@ class ProfileRequest(BaseModel):
 
 @app.get("/")
 def root():
-    return {"status": "API is running"}
+    return {"status": "GitHub Recruiter Simulator API running"}
 
 
 @app.post("/analyze")
@@ -52,13 +51,11 @@ def analyze_profile(request: ProfileRequest):
     total_stars = sum(repo.get("stargazers_count", 0) for repo in repos)
     total_forks = sum(repo.get("forks_count", 0) for repo in repos)
 
-    # 🔹 Engineering Depth
-    depth_score = min(public_repos * 2, 20)
+    # -------- SCORING -------- #
 
-    # 🔹 Impact
+    depth_score = min(public_repos * 2, 20)
     impact_score = min((total_stars + total_forks) * 2, 20)
 
-    # 🔹 Consistency (updated within last 6 months)
     recent_repos = []
     for repo in repos:
         updated = repo.get("updated_at")
@@ -69,11 +66,9 @@ def analyze_profile(request: ProfileRequest):
 
     consistency_score = min(len(recent_repos) * 3, 20)
 
-    # 🔹 Documentation
     documented = sum(1 for repo in repos if repo.get("description"))
     documentation_score = min(documented * 2, 20)
 
-    # 🔹 Professionalism
     professionalism_score = 20 if bio else 5
 
     overall_score = (
@@ -84,22 +79,52 @@ def analyze_profile(request: ProfileRequest):
         professionalism_score
     )
 
-    # Recruiter-style recommendations
-    recommendations = []
+    # -------- PROFILE TIER -------- #
 
-    if public_repos < 3:
-        recommendations.append("Build at least 3 strong projects.")
-    if total_stars < 5:
-        recommendations.append("Improve project quality to gain stars.")
-    if len(recent_repos) < 2:
-        recommendations.append("Maintain consistent GitHub activity.")
-    if not bio:
-        recommendations.append("Add a professional GitHub bio.")
-    if documented < 3:
-        recommendations.append("Improve README documentation.")
+    if overall_score >= 80:
+        tier = "Elite Engineer"
+    elif overall_score >= 60:
+        tier = "Strong Profile"
+    elif overall_score >= 40:
+        tier = "Growing Developer"
+    else:
+        tier = "Beginner Level"
+
+    # -------- STRONG SIGNALS -------- #
+
+    strong_signals = []
+    red_flags = []
+
+    if public_repos >= 5:
+        strong_signals.append("Multiple public repositories")
+    else:
+        red_flags.append("Very few public repositories")
+
+    if total_stars >= 10:
+        strong_signals.append("Projects gaining community attention")
+    else:
+        red_flags.append("Low project visibility")
+
+    if len(recent_repos) >= 3:
+        strong_signals.append("Consistent recent activity")
+    else:
+        red_flags.append("Inconsistent activity")
+
+    if bio:
+        strong_signals.append("Professional bio present")
+    else:
+        red_flags.append("Missing professional bio")
+
+    # -------- RECRUITER SUMMARY -------- #
+
+    summary = f"""
+    {username} is categorized as '{tier}' with an overall portfolio score of {overall_score}/100.
+    The profile shows {public_repos} public repositories and {followers} followers.
+    """
 
     return {
         "username": username,
+        "tier": tier,
         "followers": followers,
         "public_repos": public_repos,
         "total_stars": total_stars,
@@ -112,5 +137,7 @@ def analyze_profile(request: ProfileRequest):
             "professionalism": professionalism_score,
             "overall_score": overall_score
         },
-        "recommendations": recommendations
+        "strong_signals": strong_signals,
+        "red_flags": red_flags,
+        "summary": summary
     }

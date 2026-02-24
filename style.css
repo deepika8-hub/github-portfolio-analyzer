@@ -83,3 +83,21 @@ button:hover {
     padding: 15px;
     border-radius: 10px;
 }
+
+.summary-box, .signals, .flags {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.summary-box {
+    background: #f1f5f9;
+}
+
+.signals {
+    background: #dcfce7;
+}
+
+.flags {
+    background: #fee2e2;
+}
