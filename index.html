@@ -6,22 +6,22 @@
 </head>
 <body>
 
-    <div class="container">
-        <h1>GitHub Portfolio Analyzer</h1>
-     <p style="color:#6b7280; margin-top:-15px;">
+<div class="container">
+
+    <h1>GitHub Portfolio Analyzer</h1>
+    <p class="subtitle">
         Recruiter-style evaluation of your GitHub profile
-     </p>
+    </p>
 
-        <div class="input-section">
-            <input type="text" id="githubUrl" placeholder="Enter GitHub URL">
-            <button onclick="analyzeProfile()">Analyze</button>
-        </div>
-
-        <div id="result" class="result-section">
-            <!-- Results will appear here -->
-        </div>
+    <div class="input-section">
+        <input type="text" id="githubUrl" placeholder="Enter GitHub Username or URL">
+        <button onclick="analyzeProfile()">Analyze</button>
     </div>
 
-    <script src="script.js"></script>
+    <div id="result" class="result-section"></div>
+
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
