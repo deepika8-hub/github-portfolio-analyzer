@@ -1,27 +1,32 @@
 async function analyzeProfile() {
 
-    const input = document.getElementById("githubUrl").value.trim();
+    const inputElement = document.getElementById("githubUrl");
     const resultDiv = document.getElementById("result");
 
+    const input = inputElement.value.trim();
+
     if (!input) {
-        resultDiv.innerHTML = "<p style='color:red'>Enter a username</p>";
+        resultDiv.innerHTML = `<p style="color:red">Please enter a GitHub username</p>`;
         return;
     }
 
     let username = input;
 
     if (input.includes("github.com")) {
-        username = input.split("github.com/")[1].replace("/", "");
+        username = input.split("github.com/")[1];
+        username = username.replace("/", "");
     }
-
-    resultDiv.innerHTML = "<p>Analyzing profile...</p>";
 
     try {
 
+        resultDiv.innerHTML = `<p style="color:#555;">Analyzing profile...</p>`;
+
         const response = await fetch("https://github-portfolio-analyzer-8ab1.onrender.com/analyze", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username: username })
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ username })
         });
 
         const data = await response.json();
@@ -32,43 +37,53 @@ async function analyzeProfile() {
         }
 
         resultDiv.innerHTML = `
-            <h2>${data.username}</h2>
-            <h3>Profile Tier: ${data.tier}</h3>
-            <h1>${data.scores.overall_score}/100</h1>
+            <h2>Overall Score: ${data.scores.overall_score}/100</h2>
+            <p><strong>Tier:</strong> ${data.tier}</p>
+            <p><strong>Followers:</strong> ${data.followers}</p>
+            <p><strong>Public Repositories:</strong> ${data.public_repos}</p>
+            <p><strong>Total Stars:</strong> ${data.total_stars}</p>
+            <p><strong>Total Forks:</strong> ${data.total_forks}</p>
 
+            <hr>
+
+            <h3>Score Breakdown</h3>
             ${createBar("Engineering Depth", data.scores.engineering_depth)}
             ${createBar("Impact", data.scores.impact)}
             ${createBar("Consistency", data.scores.consistency)}
             ${createBar("Documentation", data.scores.documentation)}
             ${createBar("Professionalism", data.scores.professionalism)}
 
-            <div class="summary-box">
-                <h3>Recruiter Summary</h3>
-                <p>${data.summary}</p>
-            </div>
+            <hr>
 
-            <div class="signals">
-                <h3>Strong Signals</h3>
-                <ul>${data.strong_signals.map(s => `<li>${s}</li>`).join("")}</ul>
-            </div>
+            <h3>Red Flags</h3>
+            ${data.red_flags.length ? 
+                `<ul>${data.red_flags.map(flag => `<li>${flag}</li>`).join("")}</ul>` 
+                : "<p>No major red flags.</p>"
+            }
 
-            <div class="flags">
-                <h3>Red Flags</h3>
-                <ul>${data.red_flags.map(f => `<li>${f}</li>`).join("")}</ul>
-            </div>
+            <hr>
+
+            <h3>Summary</h3>
+            <p>${data.summary}</p>
         `;
 
     } catch (error) {
-        resultDiv.innerHTML = "<p style='color:red'>Backend unreachable</p>";
+        resultDiv.innerHTML = `<p style="color:red">Error connecting to backend</p>`;
+        console.error(error);
     }
 }
 
 function createBar(label, value) {
     return `
-        <div class="score-bar">
-            <p>${label} (${value}/20)</p>
-            <div class="bar">
-                <div class="bar-fill" style="width:${value * 5}%"></div>
+        <div style="margin-bottom:10px;">
+            <p>${label}: ${value}/20</p>
+            <div style="background:#eee; height:12px; border-radius:8px;">
+                <div style="
+                    width:${value * 5}%;
+                    height:12px;
+                    background:#2563eb;
+                    border-radius:8px;">
+                </div>
             </div>
         </div>
     `;
