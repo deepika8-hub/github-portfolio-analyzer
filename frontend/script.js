@@ -20,7 +20,7 @@ async function analyzeProfile() {
     try {
         resultDiv.innerHTML = `<p>Analyzing profile... </p>`;
 
-        const response = await fetch("http://127.0.0.1:8000/analyze", {
+        const response = await fetch("https://your-render-url.onrender.com/analyze", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -33,28 +33,35 @@ async function analyzeProfile() {
         if (data.error) {
             resultDiv.innerHTML = `<p style="color:red">${data.error}</p>`;
         } else {
+            document.getElementById("result").innerHTML = `
+    <h2>Overall Score: ${data.scores.overall_score}/100</h2>
 
-        const resultDiv = document.getElementById("result");
+    <div class="score-bar">
+        <p>Engineering Depth</p>
+        <div class="bar"><div style="width:${data.scores.engineering_depth * 5}%"></div></div>
+    </div>
 
-        resultDiv.innerHTML = `
-        <h3>Overall Score: ${data.scores.overall_score}/100</h3>
+    <div class="score-bar">
+        <p>Impact</p>
+        <div class="bar"><div style="width:${data.scores.impact * 5}%"></div></div>
+    </div>
 
-        <h4>Score Breakdown:</h4>
-        <p>Engineering Depth: ${data.scores.engineering_depth}</p>
-        <p>Impact: ${data.scores.impact}</p>
-        <p>Consistency: ${data.scores.consistency}</p>
-        <p>Documentation: ${data.scores.documentation}</p>
-        <p>Professionalism: ${data.scores.professionalism}</p>
+    <div class="score-bar">
+        <p>Consistency</p>
+        <div class="bar"><div style="width:${data.scores.consistency * 5}%"></div></div>
+    </div>
 
-        <h4>Profile Stats:</h4>
-        <p>Followers: ${data.followers}</p>
-        <p>Public Repositories: ${data.public_repos}</p>
+    <div class="score-bar">
+        <p>Documentation</p>
+        <div class="bar"><div style="width:${data.scores.documentation * 5}%"></div></div>
+    </div>
 
-        <h4>Recommendations:</h4>
-        <ul>
-            ${data.recommendations.map(rec => `<li>${rec}</li>`).join("")}
-        </ul>
-        `;
+    <div class="score-bar">
+        <p>Professionalism</p>
+        <div class="bar"><div style="width:${data.scores.professionalism * 5}%"></div></div>
+    </div>
+`;
+       
         }
 
     } catch (error) {

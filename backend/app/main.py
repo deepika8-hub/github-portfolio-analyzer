@@ -68,6 +68,8 @@ def analyze_profile(request: ProfileRequest):
     return {
     "followers": followers,
     "public_repos": public_repos,
+    "total_stars": total_stars,
+    "total_forks": total_forks,
     "scores": {
         "engineering_depth": depth_score,
         "impact": impact_score,
@@ -75,10 +77,5 @@ def analyze_profile(request: ProfileRequest):
         "documentation": documentation_score,
         "professionalism": professionalism_score,
         "overall_score": overall_score
-    },
-    "recommendations": [
-        "Increase repository count to show engineering depth.",
-        "Add detailed README files with setup and architecture explanation.",
-        "Maintain consistent weekly commits to improve activity score."
-    ]
+    }
     }
