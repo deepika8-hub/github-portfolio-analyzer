@@ -125,7 +125,9 @@ frontend/index.html
 Or use Live Server extension.
 
 
+
 Environment Variable
+
 
 To prevent GitHub API rate limits, configure:
 
@@ -134,7 +136,9 @@ GITHUB_TOKEN = your_personal_access_token
 Add this in Render → Environment → Variables.
 
 
+
 Evaluation Alignment
+
 
 Impact → Structured evaluation in under 2 minutes
 
@@ -147,14 +151,3 @@ User Experience → Clean UI with clear signal breakdown
 Presentation → Live deployed solution with demo
 
 
-Architecture Overview
-
-Frontend (GitHub Pages)
-⬇
-FastAPI Backend (Render)
-⬇
-GitHub REST API
-⬇
-Scoring Engine
-⬇
-Structured Recruiter Output
